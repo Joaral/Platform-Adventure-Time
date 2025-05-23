@@ -34,6 +34,7 @@ public class MovimientoFinn : MonoBehaviour
     {
         rb =GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
     }
 
 
@@ -43,20 +44,28 @@ public class MovimientoFinn : MonoBehaviour
 
         if (horizontal > 0)
         {
+            isMoving = true;
             sr.flipX = false;
         }
-        if (horizontal < 0)
+        else if (horizontal < 0)
         {
+            isMoving = true;
             sr.flipX = true;
         }
+        else
+        {
+            isMoving = false;
+        }
 
-        isGrounded = Physics2D.OverlapCircle(groundPos.position, groundRadius, ground);
+            isGrounded = Physics2D.OverlapCircle(groundPos.position, groundRadius, ground);
 
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-
         }
+
+        animator.SetBool("Moving", isMoving);
+        animator.SetBool("Grounded", isGrounded);
     }
 
     void FixedUpdate()
