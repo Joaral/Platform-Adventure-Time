@@ -23,7 +23,11 @@ public class MovimientoFinn : MonoBehaviour
     public float gravedadSaltoCorto;
 
     [Header("Attack")]
-    public bool isAttacking;
+    public GameObject attackPrefab;
+    public Transform attackPoint;
+    public float attackCooldown = 0.5f;
+
+    private float nextAttackTime = 0f;
 
     [Header("Animations")]
     public bool isDead;
@@ -64,6 +68,12 @@ public class MovimientoFinn : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         }
 
+
+        if (Time.time >= nextAttackTime && Input.GetKeyDown(KeyCode.Space))
+        {
+            Attack();
+            nextAttackTime = Time.time + attackCooldown;
+        }
         animator.SetBool("Moving", isMoving);
         animator.SetBool("Grounded", isGrounded);
     }
@@ -72,5 +82,11 @@ public class MovimientoFinn : MonoBehaviour
     {
         
         rb.velocity = new Vector2 (horizontal * speed, rb.velocity.y);
+    }
+
+    void Attack()
+    {
+        animator.SetTrigger("Attack");
+        Instantiate(attackPrefab, attackPoint.position, attackPoint.rotation);
     }
 }
