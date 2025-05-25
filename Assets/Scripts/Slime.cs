@@ -11,14 +11,18 @@ public class Slime : MonoBehaviour
 
     public Rigidbody2D rb;
     public bool isGrounded = false;
+    private bool wasGrounded;
     public float jumpTimer;
 
     public Transform groundCheck;
     public LayerMask groundLayer;
     public float groundCheckRadius = 0.1f;
 
+    public Animator animator;
+
     private void Start()
     {
+        animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         jumpTimer = timeBetweenJumps;
     }
@@ -27,11 +31,14 @@ public class Slime : MonoBehaviour
     {
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
+        // Solo frenamos si acaba de tocar suelo
+        if (isGrounded && !wasGrounded)
+        {
+            rb.velocity = new Vector2(0f, rb.velocity.y);
+        }
+
         if (isGrounded)
         {
-            // Al tocar suelo, detener el movimiento horizontal
-            rb.velocity = new Vector2(0f, rb.velocity.y);
-
             jumpTimer -= Time.deltaTime;
             if (jumpTimer <= 0f)
             {
@@ -39,9 +46,16 @@ public class Slime : MonoBehaviour
                 jumpTimer = timeBetweenJumps;
             }
         }
+
+        wasGrounded = isGrounded; // actualizar para el siguiente frame
     }
 
     void Jump()
+    {
+        animator.SetTrigger("Jump");
+        Invoke(nameof(PerformJump), 0.8f);
+    }
+    void PerformJump()
     {
         rb.velocity = new Vector2(moveDirection * 2f, jumpForce);
 
@@ -57,6 +71,9 @@ public class Slime : MonoBehaviour
     public void TakeDamage(int damage)
     {
         health -= damage;
+
+        animator.SetTrigger("Hurt");
+
         if (health <= 0)
         {
             Die();
@@ -66,5 +83,13 @@ public class Slime : MonoBehaviour
     void Die()
     {
         Destroy(gameObject);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.CompareTag("Player"))
+        {
+            collision.collider.GetComponent<PLayerHealth>()?.TakeDamage(1);
+        }
     }
 }

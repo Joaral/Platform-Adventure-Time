@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MovimientoFinn : MonoBehaviour
 {
-    public SpriteRenderer sr;
+    public Vector3 t;
 
     [Header("Movement")]
     public float speed;
@@ -23,7 +23,7 @@ public class MovimientoFinn : MonoBehaviour
     public float gravedadSaltoCorto;
 
     [Header("Attack")]
-    public GameObject attackPrefab;
+    public GameObject attackHitboxPrefab;
     public Transform attackPoint;
     public float attackCooldown = 0.5f;
 
@@ -37,7 +37,7 @@ public class MovimientoFinn : MonoBehaviour
     void Start()
     {
         rb =GetComponent<Rigidbody2D>();
-        sr = GetComponent<SpriteRenderer>();
+        t = transform.localScale;
         animator = GetComponent<Animator>();
     }
 
@@ -49,12 +49,14 @@ public class MovimientoFinn : MonoBehaviour
         if (horizontal > 0)
         {
             isMoving = true;
-            sr.flipX = false;
+            t.x = 1;
+            transform.localScale = t;
         }
         else if (horizontal < 0)
         {
             isMoving = true;
-            sr.flipX = true;
+            t.x = -1;
+            transform.localScale = t;
         }
         else
         {
@@ -63,7 +65,7 @@ public class MovimientoFinn : MonoBehaviour
 
             isGrounded = Physics2D.OverlapCircle(groundPos.position, groundRadius, ground);
 
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         }
@@ -87,6 +89,6 @@ public class MovimientoFinn : MonoBehaviour
     void Attack()
     {
         animator.SetTrigger("Attack");
-        Instantiate(attackPrefab, attackPoint.position, attackPoint.rotation);
+        Instantiate(attackHitboxPrefab, attackPoint.position, attackPoint.rotation);
     }
 }
